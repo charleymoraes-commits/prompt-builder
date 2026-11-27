@@ -418,13 +418,24 @@
   ];
   const PROMO_PRESETS = [
     {name:'None', value:''},
-    {name:'Big screen / jumbotron', value:'a large stadium screen/jumbotron displaying "[PROMO COPY]" with a small QR code'},
-    {name:'Stadium poster/banner', value:'a stadium banner reading "[PROMO COPY]" with a small QR code'},
-    {name:'Tabletop signage', value:'a small tabletop signage displaying "[PROMO COPY]" with a small QR code'},
-    {name:'Totem', value:'a shopping mall totem displaying "[PROMO COPY]" with a small QR code'},
-    {name:'TV corner overlay', value:'a TV screen with a bottom-right corner overlay reading "[PROMO COPY]" and a small QR code'},
-    {name:'Merchandising', value:'branded merchandising material featuring "[PROMO COPY]" with a small QR code'}
+    {name:'Big screen / jumbotron', value:'a blurred large stadium screen/jumbotron displaying "[PROMO COPY]" with a small QR code following the brand guide and style of the brand images attached'},
+    {name:'Stadium poster/banner', value:'a blurred stadium banner reading "[PROMO COPY]" with a small QR code following the brand guide and style of the brand images attached'},
+    {name:'Tabletop signage', value:'a blurred small tabletop signage displaying "[PROMO COPY]" with a small QR code following the brand guide and style of the brand images attached'},
+    {name:'Totem', value:'a blurred shopping mall totem displaying "[PROMO COPY]" with a small QR code following the brand guide and style of the brand images attached'},
+    {name:'TV corner overlay', value:'a blurred TV screen with a bottom-right corner overlay reading "[PROMO COPY]" and a small QR code following the brand guide and style of the brand images attached'},
+    {name:'Merchandising', value:'blurred branded merchandising material featuring "[PROMO COPY]" with a small QR code following the brand guide and style of the brand images attached'}
   ];
+  // Map exact old built-in promo values → new ones so drafts that still hold the previous
+  // default text pick up the update without wiping any user-edited or custom presets.
+  const PROMO_PRESET_MIGRATIONS = {
+    'a large stadium screen/jumbotron displaying "[PROMO COPY]" with a small QR code': PROMO_PRESETS[1].value,
+    'a stadium banner reading "[PROMO COPY]" with a small QR code': PROMO_PRESETS[2].value,
+    'a small tabletop signage displaying "[PROMO COPY]" with a small QR code': PROMO_PRESETS[3].value,
+    'a shopping mall totem displaying "[PROMO COPY]" with a small QR code': PROMO_PRESETS[4].value,
+    'a TV screen with a bottom-right corner overlay reading "[PROMO COPY]" and a small QR code': PROMO_PRESETS[5].value,
+    'branded merchandising material featuring "[PROMO COPY]" with a small QR code': PROMO_PRESETS[6].value
+  };
+  const ATTACHING_IMAGES_CLAUSE = 'reference image(s) are attached for style guidance only — match the color palette, text style and font, photography style, lighting, and overall visual look shown in the attached images; do not copy exactly the same infos and texts, attached are only for you visual guidance';
   const DEFAULT_STYLE_PRESET = {
     id:'default', name:'Cinematic default', locked:true,
     value:'Create me a Cinematic, professional photo, 8K, max resolution, attention to detail and textures, high definition, high quality image, great environment'
@@ -733,7 +744,7 @@
       {key:'place', text:`location: ${place}`},
       {key:'object', text:`featuring ${object}`},
       {key:'phoneNote', text:'if a phone or smartphone appears anywhere in this scene, it must be an iPhone 16 — no other phone model'},
-      {key:'attachingImages', text: selection.attachingImages ? 'reference image(s) are attached for style guidance only — match the color palette, photography style, lighting, and overall visual look shown in the attached images; do not copy any text, logos, or specific objects/elements from the reference images' : null}
+      {key:'attachingImages', text: selection.attachingImages ? ATTACHING_IMAGES_CLAUSE : null}
     ].filter(s => s.text && s.text.trim().length);
 
     return segments;
@@ -1022,7 +1033,7 @@
       canvasLine,
       `Leave a clean, consistent white gutter/margin space between each tile, clearly separating them from one another — like a print magazine grid layout, not tiles touching edge to edge internally. Each tile keeps its own background color and content fully contained within its cell, with visible white space forming the dividing lines between tiles.`,
       brandLine,
-      coverGlobal.attachingImages ? 'reference image(s) are attached for style guidance only — match the color palette, photography style, lighting, and overall visual look shown in the attached images; do not copy any text, logos, or specific objects/elements from the reference images' : null,
+      coverGlobal.attachingImages ? ATTACHING_IMAGES_CLAUSE : null,
       `Each of the ${n} tile${n>1?'s':''} features unique content defined by the specific parameters below:`,
       tileText,
       'Professional commercial photography quality, high resolution, eye-catching composition.',
@@ -1090,6 +1101,9 @@
     customTextPresets = textPresets || {};
     combos = savedCombos || [];
     selection = draft || {};
+    if(selection.promoMockup && PROMO_PRESET_MIGRATIONS[selection.promoMockup]){
+      selection.promoMockup = PROMO_PRESET_MIGRATIONS[selection.promoMockup];
+    }
     stylePresets = [DEFAULT_STYLE_PRESET, ...(savedStylePresets || [])];
     coverGlobal = coverDraft || { brand:'', website:'' };
     coverBatch = savedBatch || [];
